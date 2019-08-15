@@ -9,6 +9,10 @@
 /home/marc/CLionProjects/VMParser/main.cpp
 iostream
 -
-stdio.h
+cstdio
+-
+fstream
+-
+cstring
 -
 
