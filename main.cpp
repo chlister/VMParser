@@ -152,7 +152,7 @@ string splitInstruction(string& line) {
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if(line.find("eq") != string::npos){ // JEQ TODO:
+    } else if(line.find("eq") != string::npos){
         stringstream ss;
         ss << varCounter;
         res = "@SP" + lineBreaker +
@@ -174,7 +174,7 @@ string splitInstruction(string& line) {
               "(CONTINUE_" + ss.str()+")"+lineBreaker;
         varCounter++;
         return res;
-    } else if(line.find("lt") != string::npos){ // JLE TODO: D;JLE == D < 0
+    } else if(line.find("lt") != string::npos){
         stringstream ss;
         ss << varCounter;
         res = "@SP" + lineBreaker +
@@ -196,7 +196,7 @@ string splitInstruction(string& line) {
               "(CONTINUE_" + ss.str()+")"+lineBreaker;
         varCounter++;
         return res;
-    } else if(line.find("gt") != string::npos){ // JLE TODO: D;JGE == D > 0
+    } else if(line.find("gt") != string::npos){
         stringstream ss;
         ss << varCounter;
         res = "@SP" + lineBreaker +
@@ -245,6 +245,7 @@ string splitInstruction(string& line) {
     }
     return "";
 }
+
 string pushInstruction(string& line){
     string res;
     // push method
@@ -283,7 +284,7 @@ string pushInstruction(string& line){
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if (line.find("temp") != string::npos) { //TODO: test
+    } else if (line.find("temp") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@5" + lineBreaker +
@@ -295,7 +296,7 @@ string pushInstruction(string& line){
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if (line.find("static") != string::npos) { // TODO: test
+    } else if (line.find("static") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@16" + lineBreaker +
@@ -307,7 +308,7 @@ string pushInstruction(string& line){
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if (line.find("this") != string::npos) { // Take what's in THIS-pointer plus number and put it in SPmemory// TODO:
+    } else if (line.find("this") != string::npos) { // Take what's in THIS-pointer plus number and put it in SPmemory//
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@THIS" + lineBreaker +
@@ -321,7 +322,7 @@ string pushInstruction(string& line){
               "@SP" +lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if (line.find("that") != string::npos) { // Take what's in THAT-pointer plus number and put it in SPmemory//// TODO:
+    } else if (line.find("that") != string::npos) { // Take what's in THAT-pointer plus number and put it in SPmemory//
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@THAT" + lineBreaker +
@@ -335,7 +336,7 @@ string pushInstruction(string& line){
               "@SP" +lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    }  else if (line.find("pointer 0") != string::npos) { // TODO:
+    }  else if (line.find("pointer 0") != string::npos) {
         res = "@THIS" + lineBreaker +
               "D=M" + lineBreaker +
               "@SP" + lineBreaker +
@@ -344,7 +345,7 @@ string pushInstruction(string& line){
               "@SP"+ lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    }  else if (line.find("pointer 1") != string::npos) { // TODO:
+    }  else if (line.find("pointer 1") != string::npos) {
         res = "@THAT" + lineBreaker +
               "D=M" + lineBreaker +
               "@SP" + lineBreaker +
@@ -360,7 +361,7 @@ string popInstruction(string& line){
     string res;
     size_t found = line.find_last_of(' ');
     string mem = line.substr(found+1, size(line));
-    if (line.find("local") != string::npos) { // TODO: test
+    if (line.find("local") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@LCL" + lineBreaker +
@@ -375,7 +376,7 @@ string popInstruction(string& line){
               "A=M" + lineBreaker +
               "M=D" + lineBreaker;
         return res;
-    } else if (line.find("argument") != string::npos) { // TODO: test
+    } else if (line.find("argument") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@ARG" + lineBreaker +
@@ -390,7 +391,7 @@ string popInstruction(string& line){
               "A=M" + lineBreaker +
               "M=D" + lineBreaker;
         return res;
-    } else if (line.find("static") != string::npos) { // TODO: test
+    } else if (line.find("static") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@16" + lineBreaker +
@@ -405,7 +406,7 @@ string popInstruction(string& line){
               "A=M" + lineBreaker+
               "M=D" + lineBreaker;
         return res;
-    } else if (line.find("temp") != string::npos) { // TODO: test
+    } else if (line.find("temp") != string::npos) {
         res = "@" + mem + lineBreaker +
               "D=A" + lineBreaker +
               "@5" + lineBreaker +
@@ -467,7 +468,6 @@ string popInstruction(string& line){
 }
 string removeWhiteSpaceTrail(string& line){
     for (int i = line.size()-1; i > 0; --i) {
-        char sp = ' ';
         if(!isspace(line.at(i)))
             return line;
         else
