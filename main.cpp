@@ -2,15 +2,17 @@
 #include <cstdio>
 #include <fstream>
 #include <cstring>
+#include <sstream>
 
+static int varCounter = 0;
 int FileExists( char *filename);
 std::string splitInstruction( std::string&);
 
 using namespace std;
 int main() {
     string workDir = "/home/marc/Documents/School/nand2tetris/nand2tetris/projects/07/";
-    string foldername = "Output/StackTest/";
-    string VMName = "StackTest.vm";
+    string foldername = "Output/BasicTest/";
+    string VMName = "BasicTest.vm";
     string assOutput = VMName.substr(0, VMName.find('.')) + ".asm";
 
     string inputFile = workDir + foldername + VMName;
@@ -103,9 +105,10 @@ string splitInstruction(string& line) {
                   "A=M+D" + lineBreaker +
                   "D=M" + lineBreaker +
                   "@SP" + lineBreaker +
-                  "M=M-1" + lineBreaker +
                   "A=M" + lineBreaker +
-                  "M=D" + lineBreaker;
+                  "M=D" + lineBreaker +
+                  "@SP" + lineBreaker +
+                  "M=M+1" + lineBreaker;
             return res;
         } else if (line.find("argument") != string::npos) {
             res = "@" + mem + lineBreaker +
@@ -114,40 +117,80 @@ string splitInstruction(string& line) {
                   "A=M+D" + lineBreaker +
                   "D=M" + lineBreaker +
                   "@SP" + lineBreaker +
-                  "M=M-1" + lineBreaker +
-                  "A=M" +lineBreaker +
-                  "M=D" +lineBreaker;
-        } else if (line.find("temp") != string::npos) { //TODO: test
-            res = "@SP" + mem + lineBreaker +
-                  "M=M-1" + lineBreaker +
                   "A=M" + lineBreaker +
-                  "D=M" + lineBreaker +
-                  "@temp_" + mem + lineBreaker +
-                  "M=D" + lineBreaker ;
+                  "M=D" + lineBreaker +
+                  "@SP" + lineBreaker +
+                  "M=M+1" + lineBreaker;
+            return res;
+        } else if (line.find("temp") != string::npos) { //TODO: test
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@5" + lineBreaker +
+                  "A=A+D" + lineBreaker +
+                  "D=M"+lineBreaker+
+                  "@SP"+lineBreaker +
+                  "A=M" +lineBreaker+
+                  "M=D" + lineBreaker +
+                  "@SP" + lineBreaker +
+                  "M=M+1" + lineBreaker;
             return res;
         } else if (line.find("static") != string::npos) { // TODO: test
-            res = "@SP" + mem + lineBreaker +
-                  "M=M-1" + lineBreaker +
-                  "A=M" + lineBreaker +
-                  "D=M" + lineBreaker +
-                  "@static_" + mem + lineBreaker +
-                  "M=D" + lineBreaker ;
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@16" + lineBreaker +
+                  "A=A+D" + lineBreaker +
+                  "D=M"+lineBreaker+
+                  "@SP"+lineBreaker +
+                  "A=M" +lineBreaker+
+                  "M=D" + lineBreaker +
+                  "@SP" + lineBreaker +
+                  "M=M+1" + lineBreaker;
             return res;
-        } else if (line.find("this") != string::npos) { // TODO:
-            res = "@SP" + mem + lineBreaker +
-                  "M=M-1" + lineBreaker +
+        } else if (line.find("this") != string::npos) { // Take what's in THIS-pointer plus number and put it in SPmemory// TODO:
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@THIS" + lineBreaker +
+                  "A=M+D" + lineBreaker +
+                  "D=M"+lineBreaker+
+                  "@R13"+lineBreaker +
+                  "M=D" +lineBreaker+
+                  "@SP" + lineBreaker +
                   "A=M" + lineBreaker +
-                  "D=M" + lineBreaker +
-                  "@THIS" + mem + lineBreaker +
-                  "M=D" + lineBreaker ;
+                  "M=D" + lineBreaker +
+                  "@SP" +lineBreaker +
+                  "M=M+1" + lineBreaker;
             return res;
-        } else if (line.find("that") != string::npos) { // TODO:
-            res = "@SP" + mem + lineBreaker +
-                  "M=M-1" + lineBreaker +
+        } else if (line.find("that") != string::npos) { // Take what's in THAT-pointer plus number and put it in SPmemory//// TODO:
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@THAT" + lineBreaker +
+                  "A=M+D" + lineBreaker +
+                  "D=M"+lineBreaker+
+                  "@R13"+lineBreaker +
+                  "M=D" +lineBreaker+
+                  "@SP" + lineBreaker +
                   "A=M" + lineBreaker +
+                  "M=D" + lineBreaker +
+                  "@SP" +lineBreaker +
+                  "M=M+1" + lineBreaker;
+            return res;
+        }  else if (line.find("pointer 0") != string::npos) { // TODO:
+            res = "@THIS" + lineBreaker +
                   "D=M" + lineBreaker +
-                  "@THAT" + mem + lineBreaker +
-                  "M=D" + lineBreaker ;
+                  "@SP" + lineBreaker +
+                  "A=M" + lineBreaker +
+                  "M=D" + lineBreaker +
+                  "@SP"+ lineBreaker +
+                  "M=M+1" + lineBreaker;
+            return res;
+        }  else if (line.find("pointer 1") != string::npos) { // TODO:
+            res = "@THAT" + lineBreaker +
+                  "D=M" + lineBreaker +
+                  "@SP" + lineBreaker +
+                  "A=M" + lineBreaker +
+                  "M=D" + lineBreaker +
+                  "@SP"+ lineBreaker +
+                  "M=M+1" + lineBreaker;
             return res;
         }
     } else if(line.find("pop") != string::npos) {
@@ -163,6 +206,7 @@ string splitInstruction(string& line) {
                   "M=D" +lineBreaker+           // Pointer to local+memorylocation
                   "@SP" +lineBreaker +          // Next get value of SP
                   "M=M-1" + lineBreaker +
+                  "A=M" + lineBreaker +
                   "D=M" + lineBreaker +         // Value saved in D
                   "@R13" + lineBreaker +
                   "A=M" + lineBreaker +
@@ -177,42 +221,84 @@ string splitInstruction(string& line) {
                   "M=D" +lineBreaker+           // Pointer to local+memorylocation
                   "@SP" +lineBreaker +          // Next get value of SP
                   "M=M-1" + lineBreaker +
+                  "A=M" + lineBreaker +
                   "D=M" + lineBreaker +         // Value saved in D
                   "@R13" + lineBreaker +
                   "A=M" + lineBreaker +
                   "M=D" + lineBreaker;
             return res;
         } else if (line.find("static") != string::npos) { // TODO: test
-            res = "@SP" + lineBreaker +
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@16" + lineBreaker +
+                  "D=A+D" + lineBreaker +
+                  "@R13" + lineBreaker +
+                  "M=D" +lineBreaker +
+                  "@SP" + lineBreaker +
                   "M=M-1" + lineBreaker +
                   "A=M" + lineBreaker +
                   "D=M" + lineBreaker +
-                  "@static_" + mem + lineBreaker +
+                  "@R13" + lineBreaker +
+                  "A=M" + lineBreaker+
                   "M=D" + lineBreaker;
             return res;
         } else if (line.find("temp") != string::npos) { // TODO: test
-            res = "@SP" + lineBreaker +
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@5" + lineBreaker +
+                  "D=A+D" + lineBreaker +
+                  "@R13" + lineBreaker +
+                  "M=D" +lineBreaker +
+                  "@SP" + lineBreaker +
                   "M=M-1" + lineBreaker +
                   "A=M" + lineBreaker +
                   "D=M" + lineBreaker +
-                  "@temp_" + mem + lineBreaker +
+                  "@R13" + lineBreaker +
+                  "A=M" + lineBreaker+
                   "M=D" + lineBreaker;
             return res;
-        } else if (line.find("this") != string::npos) { // TODO: test
-            res = "@SP" + lineBreaker +
-                  "M=M-1" + lineBreaker +
+        } else if (line.find("this") != string::npos) {
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@THIS" + lineBreaker +
+                  "D=M+D" + lineBreaker +
+                  "@R13"+lineBreaker +
+                  "M=D" +lineBreaker+           // Pointer to local+memorylocation
+                  "@SP" +lineBreaker +          // Next get value of SP
+                  "AM=M-1" + lineBreaker +
+                  "D=M" + lineBreaker +         // Value saved in D
+                  "@R13" + lineBreaker +
                   "A=M" + lineBreaker +
-                  "D=M" + lineBreaker +
-                  "@THIS" + mem + lineBreaker +
                   "M=D" + lineBreaker;
             return res;
-        } else if (line.find("that") != string::npos) { // TODO: test
+        } else if (line.find("that") != string::npos) {
+            res = "@" + mem + lineBreaker +
+                  "D=A" + lineBreaker +
+                  "@THAT" + lineBreaker +
+                  "D=M+D" + lineBreaker +
+                  "@R13"+lineBreaker +
+                  "M=D" +lineBreaker+           // Pointer to local+memorylocation
+                  "@SP" +lineBreaker +          // Next get value of SP
+                  "AM=M-1" + lineBreaker +
+                  "D=M" + lineBreaker +         // Value saved in D
+                  "@R13" + lineBreaker +
+                  "A=M" + lineBreaker +
+                  "M=D" + lineBreaker;
+            return res;
+        }  else if (line.find("pointer 0") != string::npos) {
             res = "@SP" + lineBreaker +
                   "M=M-1" + lineBreaker +
                   "A=M" + lineBreaker +
                   "D=M" + lineBreaker +
-                  "@THAT" + mem + lineBreaker +
-                  "M=D" + lineBreaker;
+                  "@THIS" + lineBreaker +
+                  "M=D"+lineBreaker ;
+            return res;
+        } else if (line.find("pointer 1") != string::npos) {
+            res = "@SP" + lineBreaker +
+                  "M=M-1" + lineBreaker +
+                  "A=M" + lineBreaker +
+                  "@THAT" + lineBreaker +
+                  "M=D"+lineBreaker ;
             return res;
         }
     }
@@ -231,15 +317,11 @@ string splitInstruction(string& line) {
         return res;
     } else if (line.find("sub") != string::npos) {
         res = "@SP" + lineBreaker +
-              "M=M-1" + lineBreaker +
-              "A=M" + lineBreaker +
+              "AM=M-1" + lineBreaker +
               "D=M" + lineBreaker +
               "@SP" + lineBreaker +
-              "M=M-1" + lineBreaker +
-              "A=M" + lineBreaker +
-              "MD=M-D" + lineBreaker +
-              "@SP" + lineBreaker +
-              "M=M+1" + lineBreaker;
+              "A=M-1" + lineBreaker +
+              "M=M-D" + lineBreaker;
         return res;
     } else if(line.find("not") != string::npos){ // binary not
         res = "@SP" + lineBreaker +         // Stackpointer
@@ -259,53 +341,95 @@ string splitInstruction(string& line) {
               "M=M+1" + lineBreaker;
         return res;
     } else if(line.find("eq") != string::npos){ // JEQ TODO:
+        stringstream ss;
+        ss << varCounter;
         res = "@SP" + lineBreaker +
-              "M=M-1" + lineBreaker+        // SP one back to retrieve 1. arg
-              "A=M" + lineBreaker +
+              "AM=M-1" + lineBreaker+        // SP one back to retrieve 1. arg
               "D=M" + lineBreaker +         // Save 1. arg in D
-              "@SP" + lineBreaker +
-              "M=M-1" + lineBreaker +
-              "A=M" + lineBreaker +         // Stackpointer is now at second arg
+              "A=A-1" + lineBreaker +
               "D=M-D" + lineBreaker +       // minus the two args
-              "@IS_EQUAL" + lineBreaker +   // point to label
-              "D;JEQ" + lineBreaker +
-              "A=M" + lineBreaker +;
+              "@NOT_EQUAL_" + ss.str() + lineBreaker +   // point to label
+              "D;JNE" + lineBreaker +       // Test if D == 0
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=-1" + lineBreaker +
+              "@CONTINUE_" + ss.str() + lineBreaker +
+              "0;JMP" + lineBreaker +
+              "(NOT_EQUAL_"+ss.str()+")"+lineBreaker +
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=0" + lineBreaker +
+              "(CONTINUE_" + ss.str()+")"+lineBreaker;
+        varCounter++;
         return res;
-    } else if(line.find("gt") != string::npos){ // JGE TODO:
-        res = "@SP" + lineBreaker +         // Stackpointer
+    } else if(line.find("lt") != string::npos){ // JLE TODO: D;JLE == D < 0
+        stringstream ss;
+        ss << varCounter;
+        res = "@SP" + lineBreaker +
+              "AM=M-1" + lineBreaker+        // SP one back to retrieve 1. arg
+              "D=M" + lineBreaker +         // Save 1. arg in D
+              "A=A-1" + lineBreaker +
+              "D=M-D" + lineBreaker +       // minus the two args
+              "@NOT_LESS_" + ss.str() + lineBreaker +   // point to label
+              "D;JGE" + lineBreaker +       // Test if D == 0
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=-1" + lineBreaker +
+              "@CONTINUE_" + ss.str() + lineBreaker +
+              "0;JMP" + lineBreaker +
+              "(NOT_LESS_"+ss.str()+")"+lineBreaker +
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=0" + lineBreaker +
+              "(CONTINUE_" + ss.str()+")"+lineBreaker;
+        varCounter++;
+        return res;
+    } else if(line.find("gt") != string::npos){ // JLE TODO: D;JGE == D > 0
+        stringstream ss;
+        ss << varCounter;
+        res = "@SP" + lineBreaker +
+              "AM=M-1" + lineBreaker+        // SP one back to retrieve 1. arg
+              "D=M" + lineBreaker +         // Save 1. arg in D
+              "A=A-1" + lineBreaker +
+              "D=M-D" + lineBreaker +       // minus the two args
+              "@NOT_GREATER_" + ss.str() + lineBreaker +   // point to label
+              "D;JLE" + lineBreaker +       // Test if D == 0
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=-1" + lineBreaker +
+              "@CONTINUE_" + ss.str() + lineBreaker +
+              "0;JMP" + lineBreaker +
+              "(NOT_GREATER_"+ss.str()+")"+lineBreaker +
+              "@SP" + lineBreaker +
+              "A=M-1" + lineBreaker +
+              "M=0" + lineBreaker +
+              "(CONTINUE_" + ss.str()+")"+lineBreaker;
+        varCounter++;
+        return res;
+    }else if(line.find("or") != string::npos){ // bitwise or ?
+        res = "@SP" + lineBreaker +
+              "M=M-1" + lineBreaker+
+              "A=M" + lineBreaker +
+              "D=M" + lineBreaker +
+              "@SP" + lineBreaker +
               "M=M-1" + lineBreaker +
               "A=M" + lineBreaker +
-              "M=!M" + lineBreaker +
-              "M=M+1" + lineBreaker+
+              "M=M|D" + lineBreaker +
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
-    } else if(line.find("lt") != string::npos){ // JLE TODO:
-        res = "@SP" + lineBreaker +         // Stackpointer
-              "M=M-1" + lineBreaker +
+    }else if(line.find("and") != string::npos){ // Bitwise and?
+        res = "@SP" + lineBreaker +
+              "M=M-1" + lineBreaker+
               "A=M" + lineBreaker +
-              "M=!M" + lineBreaker +
-              "M=M+1" + lineBreaker+
+              "D=M" + lineBreaker +
               "@SP" + lineBreaker +
-              "M=M+1" + lineBreaker;
-        return res;
-    } else if(line.find("and") != string::npos){ //  TODO:
-        res = "@SP" + lineBreaker +         // Stackpointer
               "M=M-1" + lineBreaker +
               "A=M" + lineBreaker +
-              "M=!M" + lineBreaker +
-              "M=M+1" + lineBreaker+
-              "@SP" + lineBreaker +
-              "M=M+1" + lineBreaker;
-        return res;
-    } else if(line.find("or") != string::npos){ // TODO:
-        res = "@SP" + lineBreaker +         // Stackpointer
-              "M=M-1" + lineBreaker +
-              "A=M" + lineBreaker +
-              "M=!M" + lineBreaker +
-              "M=M+1" + lineBreaker+
+              "M=M&D" + lineBreaker +
               "@SP" + lineBreaker +
               "M=M+1" + lineBreaker;
         return res;
     }
+    return "";
 }
