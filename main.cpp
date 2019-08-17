@@ -8,7 +8,6 @@
 static int varCounter = 0;
 static std::string lineBreaker = "\r\n";
 
-int FileExists( char *filename);
 std::string splitInstruction( std::string&);
 std::string popInstruction(std::string&);
 std::string pushInstruction(std::string&);
@@ -24,8 +23,8 @@ int main() {
 
 
     string workDir = "/home/marc/Documents/School/nand2tetris/nand2tetris/projects/08/";
-    string foldername = "Output/BasicLoop/";
-    string VMName = "BasicLoop.vm";
+    string foldername = "Output/SimpleFunction/";
+    string VMName = "SimpleFunction.vm";
     string assOutput = VMName.substr(0, VMName.find('.')) + ".asm";
 
     string inputFile = workDir + foldername + VMName;
@@ -46,8 +45,6 @@ int main() {
         while (getline(file, line)){
             line = line.substr(0, line.find('\r')); //
             line = line.substr( 0, line.find('/'));
-//            line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
-
             if(!line.empty())
                 res += splitInstruction(line);
         }
@@ -83,16 +80,6 @@ int main() {
             std::cout <<  "File couldn't be created" << std::endl;
         }
     }
-
-
-//    cout << "splitting string" << endl;
-//    size_t found = linepush.find_last_not_of(' ');
-//    cout << "last sentence: " << linepush.substr(found) << endl;
-    // find command
-    // find MemoryAccess
-    // Find location
-//    cout << splitInstruction("push local 4") << endl;
-
     cout << "END PROGRAM" << endl;
     return 0;
 }
@@ -104,10 +91,29 @@ string splitInstruction(string& line) {
         return pushInstruction(line);
     } else if(line.find("pop") != string::npos) {
         return popInstruction(line);
-    } else if(line.find("label") != string::npos){
+    } else if(line.find("function") != string::npos) { // TODO:
+        // find function label
+        string label = line.substr(line.find(' ')+1, line.substr(line.find(' ')+1, line.size()).find(' '));
+        label = (label.substr(0, label.find('.'))+"$"+label.substr(label.find('.')+1, label.size()));
+        // return label "@RETURNLABEL" + varCounter + lineBreaker;
+        res =
+             "("+label+")" + lineBreaker;
+
+//             varCounter++;
+        return res;
+    } else if(line.find("return") != string::npos){
+        res = "D=M\n"
+              "@ARG\n"
+              "A=M\n"
+              "M=D\n";
+        return res;
+    }
+
+    else if(line.find("label") != string::npos){
         // label instr
         return  "("+line.substr(line.find(' ')+1, line.size())+")" + lineBreaker;
-    } else if(line.find("if-goto") != string::npos){
+    }
+    else if(line.find("if-goto") != string::npos){
         res = "@SP" + lineBreaker+
               "A=M-1" + lineBreaker +
               "D=M" + lineBreaker +
